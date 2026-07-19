@@ -3,6 +3,7 @@ import '../l10n/app_strings.dart';
 import '../models/tranche.dart';
 import '../screens/change_password_screen.dart';
 import '../screens/customer_service_screen.dart';
+import '../screens/daily_transaction_screen.dart';
 import '../screens/transfer_screen.dart';
 import '../services/smart_search_service.dart';
 
@@ -253,7 +254,12 @@ class _SmartSearchResultsState extends State<_SmartSearchResults> {
           );
           break;
         case 'view_transactions':
-          widget.onNavigateToTab?.call(3);
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  DailyTransactionScreen(initialParams: parameters),
+            ),
+          );
           break;
         case 'view_products':
           widget.onNavigateToTab?.call(3);

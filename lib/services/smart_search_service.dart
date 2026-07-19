@@ -13,7 +13,7 @@ You are a banking app intent parser. Analyze the user request and respond ONLY w
 Available actions:
 - change_password: user wants to change/reset password
 - transfer_money: user wants to transfer money. params: amount (number), recipient (string)
-- view_transactions: user wants to see transaction history
+  - view_transactions: Find/view/search transactions. RULES: if user mentions "income"/"salary"/"revenue" set type:"income". If "expense"/"spend"/"消费"/"支出"/"cost" set type:"expense". If "last month"/"上个月" set period:"last_month". If "last week"/"上周" set period:"last_week". If "this month"/"本月" set period:"this_month". If amount over/under/above/below N set min_amount/max_amount. ANY query about money movements should use this action.
 - view_products: user wants to browse wealth products
 - contact_support: user wants customer service
 - view_account: user wants to see account/balance info
@@ -22,11 +22,23 @@ Available actions:
 Response format (JSON only, no markdown, no explanation):
 {"action": "<action_name>", "params": {<params>}}
 
+IMPORTANT: Output exactly ONE JSON object. Do NOT repeat Human:/Assistant: messages.
+
 Examples:
 User: 修改密码 → {"action": "change_password", "params": {}}
 User: transfer 1000 to Zhang → {"action": "transfer_money", "params": {"amount": 1000, "recipient": "Zhang"}}
 User: 转账给张三500元 → {"action": "transfer_money", "params": {"amount": 500, "recipient": "张三"}}
 User: 我的余额 → {"action": "view_account", "params": {}}
+User: 查看交易记录 → {"action": "view_transactions", "params": {}}
+User: find my transactions → {"action": "view_transactions", "params": {}}
+User: 上个月的交易 → {"action": "view_transactions", "params": {"period": "last_month"}}
+User: last week spending → {"action": "view_transactions", "params": {"period": "last_week", "type": "expense"}}
+User: expenses over 1000 → {"action": "view_transactions", "params": {"type": "expense", "min_amount": 1000}}
+User: 上个月的收入 → {"action": "view_transactions", "params": {"period": "last_month", "type": "income"}}
+User: income of last month → {"action": "view_transactions", "params": {"period": "last_month", "type": "income"}}
+User: 本月的支出 → {"action": "view_transactions", "params": {"period": "this_month", "type": "expense"}}
+User: 查看餐饮消费 → {"action": "view_transactions", "params": {"category": "餐饮"}}
+User: show my spending → {"action": "view_transactions", "params": {}}
 User: 你好 → {"action": "none", "params": {"reply": "您好！请问有什么可以帮您？"}}
 ''';
 
@@ -122,6 +134,7 @@ class SmartSearchService {
 
   Future<void> _createChat() async {
     debugPrint('[SMART_SEARCH] Creating chat (structured output, no function calls)...');
+    debugPrint('[SMART_SEARCH] System prompt (${_smartSearchSystemPrompt.length} chars):\n$_smartSearchSystemPrompt');
     if (_model == null) throw StateError('Model not loaded');
 
     _chat = await _model.createChat(
@@ -198,16 +211,12 @@ class SmartSearchService {
 
   SmartSearchResult _parseStructuredOutput(String text) {
     try {
-      // Extract JSON: from first { to last }
-      final startIdx = text.indexOf('{');
-      final endIdx = text.lastIndexOf('}');
-
-      if (startIdx == -1 || endIdx == -1 || endIdx <= startIdx) {
-        debugPrint('[SMART_SEARCH] No JSON found, returning as plain text');
+      final jsonStr = _extractFirstJson(text);
+      if (jsonStr == null) {
+        debugPrint('[SMART_SEARCH] No valid JSON found, returning as plain text');
         return SmartSearchResult(textResponse: text);
       }
 
-      final jsonStr = text.substring(startIdx, endIdx + 1);
       debugPrint('[SMART_SEARCH] Extracted JSON: $jsonStr');
 
       final decoded = json.decode(jsonStr);
@@ -221,7 +230,6 @@ class SmartSearchService {
       debugPrint('[SMART_SEARCH] Parsed action: $action, params: $params');
 
       if (action == null || action == 'none') {
-        // No action — return the reply text if present
         final reply = params is Map ? params['reply']?.toString() : null;
         return SmartSearchResult(textResponse: reply ?? text);
       }
@@ -248,6 +256,24 @@ class SmartSearchService {
       debugPrint('[SMART_SEARCH] Error parsing structured output: $e');
       return SmartSearchResult(textResponse: text);
     }
+  }
+
+  String? _extractFirstJson(String text) {
+    final startIdx = text.indexOf('{');
+    if (startIdx == -1) return null;
+
+    var depth = 0;
+    for (var i = startIdx; i < text.length; i++) {
+      if (text[i] == '{') {
+        depth++;
+      } else if (text[i] == '}') {
+        depth--;
+        if (depth == 0) {
+          return text.substring(startIdx, i + 1);
+        }
+      }
+    }
+    return null;
   }
 
   Future<void> resetChat() async {

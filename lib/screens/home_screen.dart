@@ -11,6 +11,7 @@ import '../widgets/tranche_card.dart';
 import 'chat_screen.dart';
 import 'change_password_screen.dart';
 import 'customer_service_screen.dart';
+import 'daily_transaction_screen.dart';
 import 'tranche_detail_screen.dart';
 import 'transfer_screen.dart';
 
@@ -834,7 +835,12 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(l10n.recentTransactions, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DailyTransactionScreen()),
+                  );
+                },
                 child: Text(l10n.viewAll, style: const TextStyle(fontSize: 13)),
               ),
             ],
