@@ -18,6 +18,54 @@ class AppStrings {
   String filterBy(String segment) => isZh ? '筛选: ${segmentZh(segment)}' : 'Filter: $segment';
   String productCount(int n) => isZh ? '$n个产品' : '$n products';
 
+  // --- Bottom Tabs ---
+  String get tabHome => isZh ? '首页' : 'Home';
+  String get tabMy => isZh ? '我的' : 'My';
+  String get tabTransfer => isZh ? '转账' : 'Transfer';
+  String get tabWealth => isZh ? '理财' : 'Wealth';
+  String get tabSettings => isZh ? '设置' : 'Settings';
+
+  // --- Home ---
+  String get welcomeBack => isZh ? '欢迎回来' : 'Welcome Back';
+  String get quickActions => isZh ? '快捷功能' : 'Quick Actions';
+  String get structuredDeposit => isZh ? '结构存款' : 'Structured Deposit';
+  String get fund => isZh ? '基金' : 'Fund';
+  String get foreignExchange => isZh ? '外汇' : 'Foreign Exchange';
+  String get insurance => isZh ? '保险' : 'Insurance';
+  String get bonds => isZh ? '债券' : 'Bonds';
+  String get more => isZh ? '更多' : 'More';
+  String get accountBalance => isZh ? '账户余额' : 'Account Balance';
+  String get totalAssets => isZh ? '总资产' : 'Total Assets';
+
+  // --- My ---
+  String get myProfile => isZh ? '个人资料' : 'My Profile';
+  String get changePassword => isZh ? '修改密码' : 'Change Password';
+  String get notificationSettings => isZh ? '通知设置' : 'Notification Settings';
+  String get biometric => isZh ? '生物识别' : 'Biometric';
+  String get statement => isZh ? '账单/报表' : 'Statements';
+  String get helpCenter => isZh ? '帮助中心' : 'Help Center';
+  String get aboutUs => isZh ? '关于我们' : 'About Us';
+  String get logout => isZh ? '退出登录' : 'Log Out';
+
+  // --- Transfer ---
+  String get transfer => isZh ? '转账' : 'Transfer';
+  String get transferToOwn => isZh ? '同名转账' : 'To Own Account';
+  String get transferToOthers => isZh ? '他人转账' : 'To Others';
+  String get internationalTransfer => isZh ? '跨境汇款' : 'International';
+  String get transferHistory => isZh ? '转账记录' : 'Transfer History';
+  String get fromAccount => isZh ? '付款账户' : 'From Account';
+  String get toAccount => isZh ? '收款账户' : 'To Account';
+  String get transferAmount => isZh ? '转账金额' : 'Amount';
+  String get transferNow => isZh ? '立即转账' : 'Transfer Now';
+  String get payeeName => isZh ? '收款人姓名' : 'Payee Name';
+  String get bankName => isZh ? '收款银行' : 'Bank Name';
+  String get remarksOptional => isZh ? '备注（选填）' : 'Remarks (Optional)';
+
+  // --- Wealth ---
+  String get wealth => isZh ? '理财' : 'Wealth';
+  String get myInvestments => isZh ? '我的投资' : 'My Investments';
+  String get browseProducts => isZh ? '浏览产品' : 'Browse Products';
+
   // --- Card labels ---
   String get riskRating => isZh ? '银行产品风险评级' : 'Bank Product Risk Rating';
   String get subscriptionPeriod => isZh ? '认购期' : 'Subscription Period';
