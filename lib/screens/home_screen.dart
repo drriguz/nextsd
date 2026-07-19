@@ -1251,7 +1251,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => TrancheDetailScreen(tranche: tranche),
+        builder: (_) => TrancheDetailScreen(
+          tranche: tranche,
+          locale: widget.localeProvider.locale,
+        ),
       ),
     );
   }

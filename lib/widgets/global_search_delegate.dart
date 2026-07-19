@@ -147,7 +147,7 @@ class GlobalSearchDelegate extends SearchDelegate {
         close(context, null);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => TrancheDetailScreen(tranche: tranche)),
+          MaterialPageRoute(builder: (_) => TrancheDetailScreen(tranche: tranche, locale: l10n.isZh ? 'zh' : 'en')),
         );
       },
     );

@@ -91,11 +91,8 @@ class FinancialSummaryService extends ChangeNotifier {
       throw StateError('Model file not found at $modelPath');
     }
 
-    await FlutterGemma.installModel(
-      modelType: ModelType.qwen3,
-      fileType: ModelFileType.litertlm,
-    ).fromFile(modelPath).install();
-
+    // Model is already installed by SmartSearchService via splash screen.
+    // Avoid re-installing (would invalidate SmartSearchService's reference).
     _model = await FlutterGemma.getActiveModel(
       maxTokens: 2048,
       preferredBackend: PreferredBackend.gpu,

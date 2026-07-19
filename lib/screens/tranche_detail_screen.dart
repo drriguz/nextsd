@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_strings.dart';
 import '../models/tranche.dart';
+import 'product_chat_screen.dart';
 
 class TrancheDetailScreen extends StatelessWidget {
   final Tranche tranche;
+  final String locale;
 
   const TrancheDetailScreen({
     super.key,
     required this.tranche,
+    required this.locale,
   });
 
   @override
@@ -16,6 +19,18 @@ class TrancheDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.productTypeName(tranche.productNameCN, tranche.product)),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProductChatScreen(tranche: tranche, locale: locale),
+            ),
+          );
+        },
+        icon: const Icon(Icons.chat_outlined),
+        label: Text(l10n.isZh ? 'AI 顾问' : 'AI Advisor'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
