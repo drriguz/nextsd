@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_gemma_litertlm/flutter_gemma_litertlm.dart';
 import 'l10n/app_strings.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/locale_provider.dart';
 
 bool gemmaSupported = true;
@@ -72,7 +72,7 @@ class _AppShellState extends State<_AppShell> {
           useMaterial3: true,
         ),
         themeMode: ThemeMode.system,
-        home: HomeScreen(localeProvider: _localeProvider),
+        home: SplashScreen(localeProvider: _localeProvider),
       ),
     );
   }

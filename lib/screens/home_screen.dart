@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_strings.dart';
 import '../models/daily_transaction.dart';
 import '../models/tranche.dart';
+import '../services/financial_summary_service.dart';
 import '../services/locale_provider.dart';
 import '../services/product_service.dart';
 import '../services/smart_search_service.dart';
@@ -51,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     MockTransactionGenerator.instance.generate();
     _loadProducts();
     _initSmartSearch();
+    _initFinancialSummary();
   }
 
   Future<void> _initSmartSearch() async {
@@ -58,6 +60,16 @@ class _HomeScreenState extends State<HomeScreen> {
       await SmartSearchService.instance.initModel();
     } catch (e) {
       debugPrint('Smart search init failed: $e');
+    }
+  }
+
+  Future<void> _initFinancialSummary() async {
+    try {
+      await FinancialSummaryService.instance.initAndGenerate(
+        isZh: widget.localeProvider.locale == 'zh',
+      );
+    } catch (e) {
+      debugPrint('Financial summary init failed: $e');
     }
   }
 
@@ -218,9 +230,86 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.zero,
       children: [
         _buildWelcomeHero(l10n),
+        _buildAiSummaryCard(l10n),
         _buildQuickActionsGrid(l10n),
         _buildRecentTransactions(l10n),
       ],
+    );
+  }
+
+  Widget _buildAiSummaryCard(AppStrings l10n) {
+    return AnimatedBuilder(
+      animation: FinancialSummaryService.instance,
+      builder: (context, _) {
+        final service = FinancialSummaryService.instance;
+        final cs = Theme.of(context).colorScheme;
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                cs.tertiaryContainer.withValues(alpha: 0.5),
+                cs.primaryContainer.withValues(alpha: 0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.auto_awesome, size: 18, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.weeklySummaryTitle,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: cs.primary),
+                  ),
+                  const Spacer(),
+                  if (service.generated && !service.isGenerating)
+                    GestureDetector(
+                      onTap: () => service.regenerate(isZh: l10n.isZh),
+                      child: Icon(Icons.refresh, size: 18, color: cs.primary),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (service.isGenerating) ...[
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        l10n.generatingSummary,
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else if (service.summary != null) ...[
+                Text(
+                  service.summary!,
+                  style: TextStyle(fontSize: 14, height: 1.5, color: cs.onSurface),
+                ),
+              ] else ...[
+                Text(
+                  l10n.summaryUnavailable,
+                  style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 

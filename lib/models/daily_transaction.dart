@@ -19,6 +19,45 @@ enum TransactionCategory {
 
 enum TransactionType { income, expense }
 
+extension TransactionCategoryLabel on TransactionCategory {
+  String label(bool isZh) {
+    if (isZh) {
+      switch (this) {
+        case TransactionCategory.salary: return '工资';
+        case TransactionCategory.bonus: return '奖金';
+        case TransactionCategory.investment: return '投资收益';
+        case TransactionCategory.transferIn: return '转入';
+        case TransactionCategory.dining: return '餐饮';
+        case TransactionCategory.shopping: return '购物';
+        case TransactionCategory.transport: return '交通';
+        case TransactionCategory.entertainment: return '娱乐';
+        case TransactionCategory.utilities: return '生活缴费';
+        case TransactionCategory.healthcare: return '医疗';
+        case TransactionCategory.education: return '教育';
+        case TransactionCategory.travel: return '旅行';
+        case TransactionCategory.transferOut: return '转出';
+        case TransactionCategory.other: return '其他';
+      }
+    }
+    switch (this) {
+      case TransactionCategory.salary: return 'Salary';
+      case TransactionCategory.bonus: return 'Bonus';
+      case TransactionCategory.investment: return 'Investment';
+      case TransactionCategory.transferIn: return 'Transfer In';
+      case TransactionCategory.dining: return 'Dining';
+      case TransactionCategory.shopping: return 'Shopping';
+      case TransactionCategory.transport: return 'Transport';
+      case TransactionCategory.entertainment: return 'Entertainment';
+      case TransactionCategory.utilities: return 'Utilities';
+      case TransactionCategory.healthcare: return 'Healthcare';
+      case TransactionCategory.education: return 'Education';
+      case TransactionCategory.travel: return 'Travel';
+      case TransactionCategory.transferOut: return 'Transfer Out';
+      case TransactionCategory.other: return 'Other';
+    }
+  }
+}
+
 class DailyTransaction {
   final String id;
   final DateTime date;

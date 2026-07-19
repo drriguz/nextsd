@@ -36,6 +36,9 @@ class AppStrings {
   String get more => isZh ? '更多' : 'More';
   String get accountBalance => isZh ? '账户余额' : 'Account Balance';
   String get totalAssets => isZh ? '总资产' : 'Total Assets';
+  String get weeklySummaryTitle => isZh ? '本周财务摘要' : 'Weekly Summary';
+  String get generatingSummary => isZh ? 'AI 正在分析您的财务数据...' : 'AI is analyzing your finances...';
+  String get summaryUnavailable => isZh ? '摘要暂时不可用' : 'Summary unavailable';
 
   // --- Customer Service ---
   String get customerService => isZh ? '智能客服' : 'Customer Service';
@@ -158,6 +161,15 @@ class AppStrings {
   String get searchTransactions => isZh ? '交易' : 'Transactions';
   String get noResults => isZh ? '未找到结果' : 'No results found';
   String get searchResults => isZh ? '搜索结果' : 'Search Results';
+
+  // --- Splash ---
+  String get appName => isZh ? '智能银行' : 'Smart Bank';
+  String get splashInitializing => isZh ? '正在初始化...' : 'Initializing...';
+  String get splashLoadingModel => isZh ? '正在加载 AI 模型...' : 'Loading AI model...';
+  String get splashModelReady => isZh ? '模型加载完成' : 'Model ready';
+  String get splashModelFailed => isZh ? '模型加载失败' : 'Failed to load model';
+  String get retry => isZh ? '重试' : 'Retry';
+  String get continueAnyway => isZh ? '仍要进入' : 'Continue Anyway';
 
   // --- Transactions ---
   String get transactions => isZh ? '交易记录' : 'Transactions';
