@@ -55,15 +55,15 @@ The app uses **Qwen3-0.6B** (litertlm format, ~586MB).
 - App reads it directly from there (no copy needed on desktop)
 
 ### Model Install Flow
-`main()` calls `FlutterGemma.initialize(inferenceEngines: [LiteRtLmEngine()])` before `runApp()`. The chat screen then:
-1. Tries loading model from disk (if installed)
-2. If no model found, prompts user to tap download button
-3. On Android: requests storage permission via `MethodChannel('com.nextsd.permission')`
-4. Installs via `FlutterGemma.installModel(...).fromFile(path)` or `.fromNetwork(url)`
-5. Loads with `FlutterGemma.getActiveModel(maxTokens: 4096, preferredBackend: PreferredBackend.gpu)`
+`main()` calls `FlutterGemma.initialize(inferenceEngines: [LiteRtLmEngine()])` before `runApp()`. On unsupported platforms the error is caught and `gemmaSupported` set to `false`. The chat screen then:
+1. Checks `gemmaSupported` flag — shows platform error if unsupported
+2. Checks model file exists at expected path — throws clear error if missing
+3. Installs via `FlutterGemma.installModel(...).fromFile(path).install()`
+4. Loads with `FlutterGemma.getActiveModel(maxTokens: 4096, preferredBackend: PreferredBackend.gpu)`
 
 ## Gotchas
 
+- **macOS requires Apple Silicon**: `flutter_gemma_litertlm` only ships arm64 native libs. Intel Macs cannot run the LLM engine. The app still works for browsing products, but chat will show a platform error.
 - **Default smoke test is stale**: `test/widget_test.dart` tests a counter app — it will fail. Replace it when writing real tests.
 - **GPU backend**: model loading prefers GPU (`PreferredBackend.gpu`). On devices without GPU support, this may need changing to CPU.
 - **Android storage permission**: requires "All files access" (MANAGE_EXTERNAL_STORAGE) on Android 11+. The native channel `com.nextsd.permission` handles this.

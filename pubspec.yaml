@@ -60,6 +60,7 @@ flutter:
 
   assets:
     - assets/products.json
+    - assets/termsheet-1784450545167.pdf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

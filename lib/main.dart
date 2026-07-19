@@ -5,13 +5,22 @@ import 'l10n/app_strings.dart';
 import 'screens/home_screen.dart';
 import 'services/locale_provider.dart';
 
+bool gemmaSupported = true;
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  FlutterGemma.initialize(
-    inferenceEngines: const [LiteRtLmEngine()],
-    maxDownloadRetries: 10,
-  );
+  try {
+    FlutterGemma.initialize(
+      inferenceEngines: const [LiteRtLmEngine()],
+      maxDownloadRetries: 10,
+    ).catchError((e) {
+      debugPrint('FlutterGemma init failed: $e');
+      gemmaSupported = false;
+    });
+  } catch (_) {
+    gemmaSupported = false;
+  }
 
   runApp(const MyApp());
 }
@@ -21,26 +30,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Structured Deposit Assistant',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1565C0),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1565C0),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.system,
-      home: _AppShell(),
-    );
+    return _AppShell();
   }
 }
 
@@ -64,7 +54,26 @@ class _AppShellState extends State<_AppShell> {
   Widget build(BuildContext context) {
     return L10nProvider(
       localeProvider: _localeProvider,
-      child: HomeScreen(localeProvider: _localeProvider),
+      child: MaterialApp(
+        title: 'Structured Deposit Assistant',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF1565C0),
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF1565C0),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        themeMode: ThemeMode.system,
+        home: HomeScreen(localeProvider: _localeProvider),
+      ),
     );
   }
 }
