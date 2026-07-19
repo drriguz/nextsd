@@ -3,9 +3,11 @@ import '../l10n/app_strings.dart';
 import '../models/tranche.dart';
 import '../services/locale_provider.dart';
 import '../services/product_service.dart';
+import '../widgets/global_search_delegate.dart';
 import '../widgets/tranche_card.dart';
 import 'chat_screen.dart';
 import 'tranche_detail_screen.dart';
+import 'transaction_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final LocaleProvider localeProvider;
@@ -96,10 +98,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = l;
     return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.productsOnSale),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: l10n.search,
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: GlobalSearchDelegate(
+                  tranches: _allTranches ?? [],
+                  l10n: l10n,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: IndexedStack(
         index: _currentTab,
         children: [
           _buildHomeTab(),
+          const TransactionScreen(),
           _buildSettingsTab(),
         ],
       ),
@@ -129,6 +150,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
             label: l10n.productsOnSale,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
+            label: l10n.transactions,
           ),
           NavigationDestination(
             icon: const Icon(Icons.settings_outlined),

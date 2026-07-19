@@ -57,6 +57,33 @@ class AppStrings {
   String get clearFilter => isZh ? '清除筛选' : 'Clear Filter';
   String get filterTitle => isZh ? '筛选投资者类型' : 'Filter by Investor Type';
 
+  // --- Search ---
+  String get search => isZh ? '搜索' : 'Search';
+  String get searchHint => isZh ? '搜索产品或交易...' : 'Search products or transactions...';
+  String get searchProducts => isZh ? '产品' : 'Products';
+  String get searchTransactions => isZh ? '交易' : 'Transactions';
+  String get noResults => isZh ? '未找到结果' : 'No results found';
+  String get searchResults => isZh ? '搜索结果' : 'Search Results';
+
+  // --- Transactions ---
+  String get transactions => isZh ? '交易记录' : 'Transactions';
+  String get portfolio => isZh ? '投资组合' : 'Portfolio';
+  String get totalInvestment => isZh ? '总投资额' : 'Total Investment';
+  String get activePositions => isZh ? '持仓中' : 'Active';
+  String get maturedPositions => isZh ? '已到期' : 'Matured';
+  String get pendingPositions => isZh ? '待处理' : 'Pending';
+  String get cancelledPositions => isZh ? '已取消' : 'Cancelled';
+  String get transactionDate => isZh ? '交易日期' : 'Transaction Date';
+  String get settlementDate => isZh ? '交割日' : 'Settlement Date';
+  String get maturity => isZh ? '到期日' : 'Maturity';
+  String get amount => isZh ? '金额' : 'Amount';
+  String get tenor => isZh ? '期限' : 'Tenor';
+  String get status => isZh ? '状态' : 'Status';
+  String get pnl => isZh ? '盈亏' : 'P&L';
+  String get remarks => isZh ? '备注' : 'Remarks';
+  String get noTransactions => isZh ? '暂无交易记录' : 'No transactions';
+  String transactionCount(int n) => isZh ? '$n笔交易' : '$n transactions';
+
   // --- Detail fields ---
   String detailLabel(String key) {
     final map = isZh ? _detailLabelsZh : _detailLabelsEn;
