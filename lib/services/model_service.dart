@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
@@ -140,6 +141,34 @@ class ModelService {
     final response = await _chat!.generateChatResponse();
     debugPrint('[MODEL] generateChatResponse returned: ${response.runtimeType}');
     return response;
+  }
+
+  Future<Map<String, dynamic>?> runStructuredQuery(
+      String systemInstruction, String userMessage) async {
+    if (_model == null) throw StateError('Model not loaded');
+
+    final tempChat = await _model.createChat(
+      systemInstruction: systemInstruction,
+      maxOutputTokens: 512,
+      supportsFunctionCalls: false,
+    );
+
+    await tempChat.addQuery(Message.text(text: userMessage, isUser: true));
+    final response = await tempChat.generateChatResponse();
+
+    if (response is TextResponse) {
+      final clean = response.token.replaceAll('<pad>', '').trim();
+      final start = clean.indexOf('{');
+      final end = clean.lastIndexOf('}');
+      if (start != -1 && end != -1 && end > start) {
+        try {
+          final decoded = json.decode(clean.substring(start, end + 1));
+          if (decoded is Map<String, dynamic>) return decoded;
+        } catch (_) {}
+      }
+      return {'reply': clean};
+    }
+    return null;
   }
 
   Future<void> resetChat() async {
