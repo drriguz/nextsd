@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_strings.dart';
+import '../models/daily_transaction.dart';
 import '../models/tranche.dart';
 import '../services/locale_provider.dart';
 import '../services/product_service.dart';
 import '../widgets/global_search_delegate.dart';
 import '../widgets/tranche_card.dart';
 import 'chat_screen.dart';
+import 'change_password_screen.dart';
+import 'customer_service_screen.dart';
 import 'tranche_detail_screen.dart';
+import 'transfer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final LocaleProvider localeProvider;
@@ -43,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     widget.localeProvider.addListener(_onLocaleChange);
+    MockTransactionGenerator.instance.generate();
     _loadProducts();
   }
 
@@ -277,7 +282,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _GridItem(Icons.currency_exchange, l10n.foreignExchange, Colors.green[50]!, () {}),
       _GridItem(Icons.shield_outlined, l10n.insurance, Colors.blue[50]!, () {}),
       _GridItem(Icons.description_outlined, l10n.bonds, Colors.purple[50]!, () {}),
-      _GridItem(Icons.grid_view, l10n.more, Colors.grey[100]!, () {}),
+      _GridItem(Icons.support_agent, l10n.customerService, Colors.teal[50]!, () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => CustomerServiceScreen(locale: widget.localeProvider.locale)));
+      }),
     ];
 
     return Padding(
@@ -422,55 +429,80 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        Card(
-          child: Column(
-            children: [
-              _myMenuItem(Icons.badge_outlined, l10n.clientId, 'CN-12345678', () {}),
-              const Divider(height: 1),
-              _myMenuItem(Icons.lock_outline, l10n.changePassword, null, () {}),
-              const Divider(height: 1),
-              _myMenuItem(Icons.notifications_outlined, l10n.notificationSettings, null, () {}),
-              const Divider(height: 1),
-              _myMenuItem(Icons.fingerprint, l10n.biometric, null, () {}),
-              const Divider(height: 1),
-              _myMenuItem(Icons.receipt_outlined, l10n.statement, null, () {}),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Column(
-            children: [
-              _myMenuItem(Icons.help_outline, l10n.helpCenter, null, () {}),
-              const Divider(height: 1),
-              _myMenuItem(Icons.info_outline, l10n.aboutUs, null, () {}),
-            ],
-          ),
-        ),
+        Text(l10n.myAccounts, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        _buildAccountCard(l10n.savings, Icons.account_balance_wallet, 'CNY 2,350,000.00', '**** 8888', cs),
+        const SizedBox(height: 8),
+        _buildAccountCard(l10n.fixedDeposits, Icons.lock_outline, 'CNY 5,000,000.00', '${l10n.maturity}: 2026-01-15', cs),
+        const SizedBox(height: 8),
+        _buildAccountCard(l10n.investments, Icons.trending_up, 'CNY 10,230,000.00', '3 ${l10n.activePositions}', cs),
         const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
-              minimumSize: const Size(double.infinity, 44),
-            ),
-            child: Text(l10n.logout),
-          ),
+        Text(l10n.quickServices, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _serviceButton(Icons.lock_outline, l10n.changePassword, () => _showChangePasswordDialog(), cs)),
+            const SizedBox(width: 12),
+            Expanded(child: _serviceButton(Icons.receipt_outlined, l10n.statement, () {}, cs)),
+            const SizedBox(width: 12),
+            Expanded(child: _serviceButton(Icons.credit_card, l10n.cardCenter, () {}, cs)),
+          ],
         ),
       ],
     );
   }
 
-  Widget _myMenuItem(IconData icon, String title, String? subtitle, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
-      title: Text(title, style: const TextStyle(fontSize: 14)),
-      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[500])) : null,
-      trailing: const Icon(Icons.chevron_right, size: 20),
+  Widget _buildAccountCard(String title, IconData icon, String amount, String subtitle, ColorScheme cs) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 24, color: cs.primary),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                  const SizedBox(height: 4),
+                  Text(amount, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _serviceButton(IconData icon, String label, VoidCallback onTap, ColorScheme cs) {
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: cs.primaryContainer.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 24, color: cs.primary),
+            const SizedBox(height: 6),
+            Text(label, style: TextStyle(fontSize: 12, color: cs.onSurface), textAlign: TextAlign.center),
+          ],
+        ),
+      ),
     );
   }
 
@@ -485,41 +517,20 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(child: _transferTypeCard(Icons.swap_horiz, l10n.transferToOwn, cs, () {})),
+            Expanded(child: _transferTypeCard(Icons.swap_horiz, l10n.transferToOwn, cs, () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TransferScreen(transferType: TransferType.own)));
+            })),
             const SizedBox(width: 12),
-            Expanded(child: _transferTypeCard(Icons.person_outline, l10n.transferToOthers, cs, () {})),
+            Expanded(child: _transferTypeCard(Icons.person_outline, l10n.transferToOthers, cs, () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TransferScreen(transferType: TransferType.others)));
+            })),
             const SizedBox(width: 12),
-            Expanded(child: _transferTypeCard(Icons.public, l10n.internationalTransfer, cs, () {})),
+            Expanded(child: _transferTypeCard(Icons.public, l10n.internationalTransfer, cs, () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TransferScreen(transferType: TransferType.international)));
+            })),
           ],
         ),
         const SizedBox(height: 24),
-        Text(l10n.transfer, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildTransferField(l10n.fromAccount, '**** **** **** 8888 (CNY)', Icons.account_balance_wallet),
-                const Divider(height: 24),
-                _buildTransferField(l10n.toAccount, l10n.toAccount, Icons.account_balance),
-                const Divider(height: 24),
-                _buildTransferField(l10n.transferAmount, '0.00', Icons.attach_money),
-                const Divider(height: 24),
-                _buildTransferField(l10n.remarksOptional, l10n.remarksOptional, Icons.edit_note),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        FilledButton(
-          onPressed: () {},
-          style: FilledButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-          ),
-          child: Text(l10n.transferNow),
-        ),
-        const SizedBox(height: 16),
         Text(l10n.transferHistory, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         _mockTransferHistory('To: Zhang Wei', 'CNY 50,000.00', '2025-07-18'),
@@ -547,25 +558,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTransferField(String label, String hint, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[500]),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-              const SizedBox(height: 2),
-              Text(hint, style: const TextStyle(fontSize: 14)),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -609,33 +601,28 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return Column(
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 80),
       children: [
         _buildWealthHeader(l10n),
+        _buildWeeklySummary(l10n),
+        _buildRecentDailyTransactions(l10n),
         _buildProductTabs(),
         _buildFilterBar(),
-        Expanded(
-          child: _filteredTranches.isEmpty
-              ? Center(
-                  child: Text(
-                    l10n.noProducts,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 15),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadProducts,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 4, bottom: 80),
-                    itemCount: _filteredTranches.length,
-                    itemBuilder: (context, index) {
-                      return TrancheCard(
-                        tranche: _filteredTranches[index],
-                        onTap: () => _showTrancheDetail(_filteredTranches[index]),
-                      );
-                    },
-                  ),
-                ),
-        ),
+        ..._filteredTranches.map((t) => TrancheCard(
+          tranche: t,
+          onTap: () => _showTrancheDetail(t),
+        )),
+        if (_filteredTranches.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: Center(
+              child: Text(
+                l10n.noProducts,
+                style: TextStyle(color: Colors.grey[500], fontSize: 15),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -668,6 +655,186 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildWeeklySummary(AppStrings l10n) {
+    final cs = Theme.of(context).colorScheme;
+    final summary = MockTransactionGenerator.instance.weeklySummary;
+    final topExpenses = summary.topExpenseCategories;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _summaryStat(l10n.weeklyIncome, summary.totalIncome, Colors.green, cs)),
+              Container(width: 1, height: 40, color: Colors.grey[300]),
+              Expanded(child: _summaryStat(l10n.weeklyExpense, summary.totalExpense, Colors.red, cs)),
+              Container(width: 1, height: 40, color: Colors.grey[300]),
+              Expanded(child: _summaryStat(l10n.weeklyNet, summary.netCashFlow, summary.netCashFlow >= 0 ? Colors.green : Colors.red, cs)),
+            ],
+          ),
+          if (topExpenses.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(l10n.expenseBreakdown, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: topExpenses.map((e) {
+                final txn = DailyTransaction(
+                  id: '', date: DateTime.now(), description: '', amount: 0, type: TransactionType.expense, category: e.key,
+                );
+                final label = l10n.isZh ? txn.categoryName : txn.categoryNameEn;
+                final pct = (e.value / summary.totalExpense * 100).toStringAsFixed(0);
+                return Chip(
+                  label: Text('$label ${_formatAmount(e.value)} ($pct%)', style: const TextStyle(fontSize: 11)),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryStat(String label, double amount, Color color, ColorScheme cs) {
+    return Column(
+      children: [
+        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+        const SizedBox(height: 4),
+        Text(
+          '¥${_formatAmount(amount)}',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentDailyTransactions(AppStrings l10n) {
+    final transactions = MockTransactionGenerator.instance.transactions.take(10).toList();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(l10n.recentTransactions, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              TextButton(
+                onPressed: () {},
+                child: Text(l10n.viewAll, style: const TextStyle(fontSize: 13)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...transactions.map((txn) => _buildTransactionTile(txn, l10n)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionTile(DailyTransaction txn, AppStrings l10n) {
+    final isIncome = txn.type == TransactionType.income;
+    final color = isIncome ? Colors.green : Colors.red;
+    final icon = _getCategoryIcon(txn.category);
+    final label = l10n.isZh ? txn.categoryName : txn.categoryNameEn;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 20, color: color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                if (txn.merchant != null)
+                  Text(txn.merchant!, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${isIncome ? '+' : '-'}¥${_formatAmount(txn.amount)}',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
+              ),
+              Text(
+                '${txn.date.month}/${txn.date.day} ${txn.date.hour.toString().padLeft(2, '0')}:${txn.date.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(TransactionCategory category) {
+    switch (category) {
+      case TransactionCategory.salary:
+        return Icons.work;
+      case TransactionCategory.bonus:
+        return Icons.card_giftcard;
+      case TransactionCategory.investment:
+        return Icons.trending_up;
+      case TransactionCategory.transferIn:
+        return Icons.call_received;
+      case TransactionCategory.dining:
+        return Icons.restaurant;
+      case TransactionCategory.shopping:
+        return Icons.shopping_bag;
+      case TransactionCategory.transport:
+        return Icons.directions_car;
+      case TransactionCategory.entertainment:
+        return Icons.movie;
+      case TransactionCategory.utilities:
+        return Icons.bolt;
+      case TransactionCategory.healthcare:
+        return Icons.local_hospital;
+      case TransactionCategory.education:
+        return Icons.school;
+      case TransactionCategory.travel:
+        return Icons.flight;
+      case TransactionCategory.transferOut:
+        return Icons.call_made;
+      case TransactionCategory.other:
+        return Icons.more_horiz;
+    }
+  }
+
+  String _formatAmount(double amount) {
+    final s = amount.toInt().toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+      buf.write(s[i]);
+    }
+    if (amount != amount.truncateToDouble()) {
+      buf.write('.${(amount - amount.truncate()).toStringAsFixed(2).substring(2)}');
+    }
+    return buf.toString();
   }
 
   Widget _buildProductTabs() {
@@ -890,6 +1057,55 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        Text(l10n.settings, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: Text(l10n.changePassword),
+                trailing: const Icon(Icons.chevron_right, size: 20),
+                onTap: () => _showChangePasswordDialog(),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.notifications_outlined),
+                title: Text(l10n.notificationSettings),
+                trailing: const Icon(Icons.chevron_right, size: 20),
+                onTap: () {},
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: Text(l10n.biometric),
+                trailing: const Icon(Icons.chevron_right, size: 20),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: Text(l10n.helpCenter),
+                trailing: const Icon(Icons.chevron_right, size: 20),
+                onTap: () {},
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(l10n.aboutUs),
+                trailing: const Icon(Icons.chevron_right, size: 20),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(l10n.modelSelection, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
         const SizedBox(height: 8),
         Card(
@@ -910,6 +1126,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: OutlinedButton(
+            onPressed: () {},
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+              minimumSize: const Size(double.infinity, 44),
+            ),
+            child: Text(l10n.logout),
+          ),
+        ),
       ],
     );
   }
@@ -922,6 +1151,13 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => TrancheDetailScreen(tranche: tranche),
       ),
+    );
+  }
+
+  void _showChangePasswordDialog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
     );
   }
 }

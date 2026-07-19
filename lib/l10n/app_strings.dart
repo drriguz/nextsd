@@ -37,6 +37,17 @@ class AppStrings {
   String get accountBalance => isZh ? '账户余额' : 'Account Balance';
   String get totalAssets => isZh ? '总资产' : 'Total Assets';
 
+  // --- Customer Service ---
+  String get customerService => isZh ? '智能客服' : 'Customer Service';
+  String get customerServiceHint => isZh ? '请问有什么可以帮您？' : 'How can I help you?';
+  String get quickQuestions => isZh ? '常见问题' : 'Quick Questions';
+  String get accountIssues => isZh ? '账户问题' : 'Account Issues';
+  String get cardServices => isZh ? '卡片服务' : 'Card Services';
+  String get transferHelp => isZh ? '转账帮助' : 'Transfer Help';
+  String get productInquiry => isZh ? '产品咨询' : 'Product Inquiry';
+  String get complaintFeedback => isZh ? '投诉建议' : 'Feedback';
+  String get csAskQuestion => isZh ? '请输入您的问题...' : 'Type your question...';
+
   // --- My ---
   String get myProfile => isZh ? '个人资料' : 'My Profile';
   String get changePassword => isZh ? '修改密码' : 'Change Password';
@@ -46,6 +57,18 @@ class AppStrings {
   String get helpCenter => isZh ? '帮助中心' : 'Help Center';
   String get aboutUs => isZh ? '关于我们' : 'About Us';
   String get logout => isZh ? '退出登录' : 'Log Out';
+  String get myAccounts => isZh ? '我的账户' : 'My Accounts';
+  String get deposits => isZh ? '存款' : 'Deposits';
+  String get savings => isZh ? '活期存款' : 'Savings';
+  String get fixedDeposits => isZh ? '定期存款' : 'Fixed Deposits';
+  String get investments => isZh ? '投资' : 'Investments';
+  String get totalLiabilities => isZh ? '负债总额' : 'Total Liabilities';
+  String get creditCard => isZh ? '信用卡' : 'Credit Card';
+  String get mortgage => isZh ? '房贷' : 'Mortgage';
+  String get quickServices => isZh ? '快捷服务' : 'Quick Services';
+  String get accountDetails => isZh ? '账户详情' : 'Account Details';
+  String get cardCenter => isZh ? '卡片中心' : 'Card Center';
+  String get eWallet => isZh ? '电子钱包' : 'E-Wallet';
 
   // --- Transfer ---
   String get transfer => isZh ? '转账' : 'Transfer';
@@ -60,11 +83,34 @@ class AppStrings {
   String get payeeName => isZh ? '收款人姓名' : 'Payee Name';
   String get bankName => isZh ? '收款银行' : 'Bank Name';
   String get remarksOptional => isZh ? '备注（选填）' : 'Remarks (Optional)';
+  String get transferSuccess => isZh ? '转账成功' : 'Transfer Successful';
+  String get transferSuccessMsg => isZh ? '转账已提交，请等待处理' : 'Transfer submitted, please wait for processing';
+  String get confirm => isZh ? '确认' : 'Confirm';
+  String get cancel => isZh ? '取消' : 'Cancel';
+  String get done => isZh ? '完成' : 'Done';
+
+  // --- Change Password ---
+  String get currentPassword => isZh ? '当前密码' : 'Current Password';
+  String get newPassword => isZh ? '新密码' : 'New Password';
+  String get confirmPassword => isZh ? '确认新密码' : 'Confirm New Password';
+  String get passwordChanged => isZh ? '密码修改成功' : 'Password Changed';
+  String get passwordChangedMsg => isZh ? '您的密码已成功修改' : 'Your password has been changed successfully';
+  String get passwordMismatch => isZh ? '两次输入的密码不一致' : 'Passwords do not match';
+  String get passwordTooShort => isZh ? '密码长度至少为6位' : 'Password must be at least 6 characters';
+  String get changePasswordTitle => isZh ? '修改密码' : 'Change Password';
 
   // --- Wealth ---
   String get wealth => isZh ? '理财' : 'Wealth';
   String get myInvestments => isZh ? '我的投资' : 'My Investments';
   String get browseProducts => isZh ? '浏览产品' : 'Browse Products';
+  String get recentTransactions => isZh ? '近期交易' : 'Recent Transactions';
+  String get weeklyIncome => isZh ? '本周收入' : 'Weekly Income';
+  String get weeklyExpense => isZh ? '本周支出' : 'Weekly Expense';
+  String get weeklyNet => isZh ? '本周净收入' : 'Weekly Net';
+  String get expenseBreakdown => isZh ? '支出分类' : 'Expense Breakdown';
+  String get viewAll => isZh ? '查看全部' : 'View All';
+  String get income => isZh ? '收入' : 'Income';
+  String get expense => isZh ? '支出' : 'Expense';
 
   // --- Card labels ---
   String get riskRating => isZh ? '银行产品风险评级' : 'Bank Product Risk Rating';
