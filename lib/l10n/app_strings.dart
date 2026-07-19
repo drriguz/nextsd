@@ -1,0 +1,255 @@
+import 'package:flutter/widgets.dart';
+import '../services/locale_provider.dart';
+
+class AppStrings {
+  final LocaleProvider _locale;
+
+  AppStrings(this._locale);
+
+  static AppStrings of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_L10nScope>()!.strings;
+  }
+
+  // --- Tabs & Filters ---
+  String get productsOnSale => isZh ? '在售产品' : 'Products on Sale';
+  String get comingSoon => isZh ? '即将开售' : 'Coming Soon';
+  String get filter => isZh ? '筛选' : 'Filter';
+  String get filterAll => isZh ? '筛选: 全部' : 'Filter: All';
+  String filterBy(String segment) => isZh ? '筛选: ${segmentZh(segment)}' : 'Filter: $segment';
+  String productCount(int n) => isZh ? '$n个产品' : '$n products';
+
+  // --- Card labels ---
+  String get riskRating => isZh ? '银行产品风险评级' : 'Bank Product Risk Rating';
+  String get subscriptionPeriod => isZh ? '认购期' : 'Subscription Period';
+  String get minInvestment => isZh ? '最低投资额' : 'Minimum Investment';
+  String get investmentTenor => isZh ? '投资期限' : 'Investment Tenor';
+  String get principalProtection => isZh ? '本金保障' : 'Principal Protection';
+  String get underlyingAsset => isZh ? '挂钩标的' : 'Underlying Asset';
+  String get nonProtected => isZh ? '非保本' : 'Non-Protected';
+  String get qualifiedInvestor => isZh ? '合格投资者' : 'Qualified Investor';
+
+  // --- Status ---
+  String get onSale => isZh ? '在售' : 'On Sale';
+  String get comingSoonBadge => isZh ? '即将开售' : 'Coming Soon';
+
+  // --- Settings ---
+  String get settings => isZh ? '设置' : 'Settings';
+  String get accountInfo => isZh ? '账户信息' : 'Account Info';
+  String get clientId => isZh ? '客户编号' : 'Client ID';
+  String get preferredLanguage => isZh ? '首选语言' : 'Preferred Language';
+  String get eligibleCities => isZh ? '适用城市' : 'Eligible Cities';
+  String get modelSelection => isZh ? '模型选择' : 'Model Selection';
+  String get defaultLabel => isZh ? '默认 (litertlm)' : 'Default (litertlm)';
+  String get comingSoonLabel => isZh ? '即将推出' : 'Coming soon';
+  String get verified => isZh ? '已验证' : 'Verified';
+  String premiumClient(String segment) => isZh ? '尊享银行客户' : 'Premium Banking Client';
+  String segmentLabel(String segment) => isZh ? '等级: $segment' : 'Segment: $segment';
+
+  // --- Detail sheet ---
+  String get productDetails => isZh ? '产品详情' : 'Product Details';
+  String get subscription => isZh ? '认购信息' : 'Subscription';
+  String get underlying => isZh ? '挂钩标的' : 'Underlying';
+  String get returns => isZh ? '收益信息' : 'Returns';
+
+  // --- Misc ---
+  String get noProducts => isZh ? '暂无产品' : 'No products available';
+  String get loadingFailed => isZh ? '加载失败' : 'Failed to load';
+  String get clearFilter => isZh ? '清除筛选' : 'Clear Filter';
+  String get filterTitle => isZh ? '筛选投资者类型' : 'Filter by Investor Type';
+
+  // --- Detail fields ---
+  String detailLabel(String key) {
+    final map = isZh ? _detailLabelsZh : _detailLabelsEn;
+    return map[key] ?? key;
+  }
+
+  static const _detailLabelsEn = {
+    'Product Type': 'Product Type',
+    'Currency': 'Currency',
+    'Tenor': 'Tenor',
+    'Coupon': 'Coupon',
+    'Coupon Frequency': 'Coupon Frequency',
+    'Principal Protection': 'Principal Protection',
+    'Strike': 'Strike',
+    'KI Barrier': 'KI Barrier',
+    'KO Barrier': 'KO Barrier',
+    'Risk Rating': 'Risk Rating',
+    'Subscription Period': 'Subscription Period',
+    'Min Order': 'Min Order',
+    'Denomination': 'Denomination',
+    'Eligible Segments': 'Eligible Segments',
+    'Eligible Cities': 'Eligible Cities',
+    'Issuer': 'Issuer',
+    'Open to QI': 'Open to QI',
+    'Min Return p.a.': 'Min Return p.a.',
+    'Max Return p.a.': 'Max Return p.a.',
+    'Barrier Return p.a.': 'Barrier Return p.a.',
+    'Barrier Level': 'Barrier Level',
+    'Participation Rate': 'Participation Rate',
+  };
+
+  static const _detailLabelsZh = {
+    'Product Type': '产品类型',
+    'Currency': '币种',
+    'Tenor': '投资期限',
+    'Coupon': '票息',
+    'Coupon Frequency': '票息频率',
+    'Principal Protection': '本金保障',
+    'Strike': '执行价',
+    'KI Barrier': '敲入价',
+    'KO Barrier': '敲出价',
+    'Risk Rating': '风险评级',
+    'Subscription Period': '认购期',
+    'Min Order': '最低投资额',
+    'Denomination': '递增单位',
+    'Eligible Segments': '适用客群',
+    'Eligible Cities': '适用城市',
+    'Issuer': '发行人',
+    'Open to QI': '开放合格投资者',
+    'Min Return p.a.': '最低年化收益',
+    'Max Return p.a.': '最高年化收益',
+    'Barrier Return p.a.': '障碍年化收益',
+    'Barrier Level': '障碍水平',
+    'Participation Rate': '参与率',
+  };
+
+  String segmentZh(String en) {
+    return _segmentMap[en] ?? en;
+  }
+
+  static const _segmentMap = {
+    'Private': '私人银行',
+    'Priority': '优先理财',
+    'Premium': '高级理财',
+    'Personal': '个人客户',
+  };
+
+  // --- Tenor display ---
+  String formatTenor(String tenor) {
+    if (isZh) {
+      final m = RegExp(r'(\d+)M').firstMatch(tenor);
+      if (m != null) return '${m.group(1)}个月';
+      final y = RegExp(r'(\d+)Y').firstMatch(tenor);
+      if (y != null) return '${y.group(1)}年';
+      return tenor;
+    }
+    final m = RegExp(r'(\d+)M').firstMatch(tenor);
+    if (m != null) return '${m.group(1)} Months';
+    final y = RegExp(r'(\d+)Y').firstMatch(tenor);
+    if (y != null) return '${y.group(1)} Years';
+    return tenor;
+  }
+
+  // --- Date formatting ---
+  String formatSubscriptionDate(String raw) {
+    try {
+      final parts = raw.split(' ').first.split('-');
+      if (parts.length != 3) return raw;
+      const monthNames = {
+        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12',
+      };
+      final month = monthNames[parts[1]] ?? parts[1];
+      if (isZh) {
+        return '${parts[2]}年$month月${parts[0]}日';
+      }
+      return '${parts[2]}-$month-${parts[0]}';
+    } catch (_) {
+      return raw;
+    }
+  }
+
+  String formatSubscriptionPeriod(String? start, String? end) {
+    if (start == null || end == null) return '-';
+    return '${formatSubscriptionDate(start)} - ${formatSubscriptionDate(end)}';
+  }
+
+  // --- Currency ---
+  String currencyName(String ccy) {
+    if (isZh) {
+      switch (ccy.toUpperCase()) {
+        case 'CNY': return '人民币';
+        case 'USD': return '美元';
+        case 'HKD': return '港元';
+        default: return ccy;
+      }
+    }
+    return ccy;
+  }
+
+  // --- Product type CN name ---
+  String productTypeName(String? productNameCN, String productEn) {
+    if (isZh) {
+      if (productNameCN != null && productNameCN.isNotEmpty) return productNameCN;
+      return _productCnNames[productEn] ?? productEn;
+    }
+    return productEn;
+  }
+
+  static const _productCnNames = {
+    'WoB Autocall': '一篮子标的自动触发赎回结构',
+    'Snowball': '雪球自动赎回结构',
+    'Range Accrual': '区间累积结构',
+    'Averaging Autocall': '平均价格自动赎回结构',
+  };
+
+  bool get isZh => _locale.isZh;
+}
+
+class _L10nScope extends InheritedWidget {
+  final AppStrings strings;
+
+  const _L10nScope({
+    required this.strings,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify(_L10nScope old) => strings != old.strings;
+}
+
+class L10nProvider extends StatefulWidget {
+  final LocaleProvider localeProvider;
+  final Widget child;
+
+  const L10nProvider({
+    super.key,
+    required this.localeProvider,
+    required this.child,
+  });
+
+  @override
+  State<L10nProvider> createState() => _L10nProviderState();
+}
+
+class _L10nProviderState extends State<L10nProvider> {
+  late AppStrings _strings;
+
+  @override
+  void initState() {
+    super.initState();
+    _strings = AppStrings(widget.localeProvider);
+    widget.localeProvider.addListener(_onLocaleChange);
+  }
+
+  void _onLocaleChange() {
+    setState(() {
+      _strings = AppStrings(widget.localeProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.localeProvider.removeListener(_onLocaleChange);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _L10nScope(
+      strings: _strings,
+      child: widget.child,
+    );
+  }
+}

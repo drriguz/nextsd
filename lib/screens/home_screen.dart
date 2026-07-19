@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 import '../models/tranche.dart';
+import '../services/locale_provider.dart';
 import '../services/product_service.dart';
 import '../widgets/tranche_card.dart';
 import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final LocaleProvider localeProvider;
+
+  const HomeScreen({super.key, required this.localeProvider});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -29,13 +33,25 @@ class _HomeScreenState extends State<HomeScreen> {
     'Priority',
     'Premium',
     'Personal',
-    '合格投资者',
   ];
+
+  AppStrings get l => AppStrings(widget.localeProvider);
 
   @override
   void initState() {
     super.initState();
+    widget.localeProvider.addListener(_onLocaleChange);
     _loadProducts();
+  }
+
+  void _onLocaleChange() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.localeProvider.removeListener(_onLocaleChange);
+    super.dispose();
   }
 
   Future<void> _loadProducts() async {
@@ -77,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = l;
     return Scaffold(
       body: IndexedStack(
         index: _currentTab,
@@ -100,16 +117,16 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentTab,
         onDestinationSelected: (index) => setState(() => _currentTab = index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.productsOnSale,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.settings,
           ),
         ],
       ),
@@ -117,6 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeTab() {
+    final l10n = l;
+
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -125,7 +144,14 @@ class _HomeScreenState extends State<HomeScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text('Failed to load: $_error', style: TextStyle(color: Colors.red[400], fontSize: 14)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${l10n.loadingFailed}: $_error', style: TextStyle(color: Colors.red[400], fontSize: 14)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _loadProducts, child: const Text('Retry')),
+            ],
+          ),
         ),
       );
     }
@@ -138,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: _filteredTranches.isEmpty
               ? Center(
                   child: Text(
-                    'No products available',
+                    l10n.noProducts,
                     style: TextStyle(color: Colors.grey[500], fontSize: 15),
                   ),
                 )
@@ -161,14 +187,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductTabs() {
+    final l10n = l;
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         children: [
-          _buildTabChip('在售产品', 0, cs),
+          _buildTabChip(l10n.productsOnSale, 0, cs),
           const SizedBox(width: 8),
-          _buildTabChip('即将开售', 1, cs),
+          _buildTabChip(l10n.comingSoon, 1, cs),
         ],
       ),
     );
@@ -203,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFilterBar() {
+    final l10n = l;
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -221,19 +249,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Icon(Icons.filter_list, size: 16, color: cs.onSurfaceVariant),
                   const SizedBox(width: 4),
-                  Text('筛选', style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+                  Text(l10n.filter, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
                 ],
               ),
             ),
           ),
           const SizedBox(width: 8),
           Text(
-            _filterSegment != null ? '筛选: $_filterSegment' : '筛选: 全部',
+            _filterSegment != null ? l10n.filterBy(_filterSegment!) : l10n.filterAll,
             style: TextStyle(fontSize: 12, color: Colors.grey[500]),
           ),
           const Spacer(),
           Text(
-            '${_filteredTranches.length}个产品',
+            l10n.productCount(_filteredTranches.length),
             style: TextStyle(fontSize: 12, color: Colors.grey[500]),
           ),
         ],
@@ -242,6 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showFilterSheet(ColorScheme cs) {
+    final l10n = l;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -254,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('筛选投资者类型', style: Theme.of(context).textTheme.titleMedium),
+              Text(l10n.filterTitle, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
@@ -262,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: _availableSegments.map((seg) {
                   final isSelected = _filterSegment == seg;
                   return ChoiceChip(
-                    label: Text(seg),
+                    label: Text(l10n.isZh ? l10n.segmentZh(seg) : seg),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
@@ -282,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _applyFilters();
                     Navigator.pop(context);
                   },
-                  child: const Text('清除筛选'),
+                  child: Text(l10n.clearFilter),
                 ),
               ],
               const SizedBox(height: 8),
@@ -294,6 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSettingsTab() {
+    final l10n = l;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -305,13 +335,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Premium Banking Client',
+          l10n.premiumClient('Priority'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 4),
         Text(
-          'Segment: Priority',
+          l10n.segmentLabel('Priority'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
         ),
@@ -324,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'Verified',
+              l10n.verified,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -334,33 +364,47 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(height: 32),
-        Text('Account Info', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
+        Text(l10n.accountInfo, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
         const SizedBox(height: 8),
         Card(
           child: Column(
             children: [
               ListTile(
                 leading: const Icon(Icons.badge_outlined),
-                title: const Text('Client ID'),
+                title: Text(l10n.clientId),
                 subtitle: const Text('CN-12345678'),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.language_outlined),
-                title: const Text('Preferred Language'),
+                title: Text(l10n.preferredLanguage),
                 subtitle: const Text('English / 中文'),
+                trailing: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'zh', label: Text('中文')),
+                    ButtonSegment(value: 'en', label: Text('EN')),
+                  ],
+                  selected: {widget.localeProvider.locale},
+                  onSelectionChanged: (value) {
+                    widget.localeProvider.setLocale(value.first);
+                  },
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.location_on_outlined),
-                title: const Text('Eligible Cities'),
+                title: Text(l10n.eligibleCities),
                 subtitle: const Text('Shanghai, Beijing, Shenzhen'),
               ),
             ],
           ),
         ),
         const SizedBox(height: 24),
-        Text('Model Selection', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
+        Text(l10n.modelSelection, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
         const SizedBox(height: 8),
         Card(
           child: RadioGroup<String>(
@@ -372,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: _availableModels.map((model) {
                 return RadioListTile<String>(
                   title: Text(model),
-                  subtitle: Text(model == 'Qwen3-0.6B' ? 'Default (litertlm)' : 'Coming soon'),
+                  subtitle: Text(model == 'Qwen3-0.6B' ? l10n.defaultLabel : l10n.comingSoonLabel),
                   value: model,
                   toggleable: false,
                 );
@@ -385,6 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showTrancheDetail(Tranche tranche) {
+    final l10n = l;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -414,45 +459,47 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(tranche.displayName, style: Theme.of(context).textTheme.titleLarge),
+                  Text(l10n.productTypeName(tranche.productNameCN, tranche.product),
+                      style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 4),
-                  Text(tranche.trancheName, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+                  Text(tranche.trancheName,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
                   const SizedBox(height: 16),
-                  _detailSection('Product Details', {
-                    'Product Type': tranche.product,
-                    'Currency': '${tranche.currencyName} (${tranche.ccy})',
-                    'Tenor': tranche.formattedTenor,
-                    if (tranche.coupon != null) 'Coupon': '${tranche.coupon}%',
-                    if (tranche.couponFreq != null) 'Coupon Frequency': tranche.couponFreq!,
-                    if (tranche.principalProtection != null) 'Principal Protection': tranche.formattedProtection,
-                    if (tranche.strike != null && tranche.strike != '0') 'Strike': '${tranche.strike}%',
-                    if (tranche.ki != null && tranche.ki != '0') 'KI Barrier': '${tranche.ki}%',
-                    if (tranche.ko != null && tranche.ko != '0') 'KO Barrier': '${tranche.ko}%',
-                    if (tranche.prr != null) 'Risk Rating': 'PRR ${tranche.prr}',
+                  _detailSection(l10n.productDetails, {
+                    l10n.detailLabel('Product Type'): tranche.product,
+                    l10n.detailLabel('Currency'): '${l10n.currencyName(tranche.ccy)} (${tranche.ccy})',
+                    l10n.detailLabel('Tenor'): l10n.formatTenor(tranche.tenor),
+                    if (tranche.coupon != null) l10n.detailLabel('Coupon'): '${tranche.coupon}%',
+                    if (tranche.couponFreq != null) l10n.detailLabel('Coupon Frequency'): tranche.couponFreq!,
+                    if (tranche.principalProtection != null) l10n.detailLabel('Principal Protection'): tranche.formattedProtection,
+                    if (tranche.strike != null && tranche.strike != '0') l10n.detailLabel('Strike'): '${tranche.strike}%',
+                    if (tranche.ki != null && tranche.ki != '0') l10n.detailLabel('KI Barrier'): '${tranche.ki}%',
+                    if (tranche.ko != null && tranche.ko != '0') l10n.detailLabel('KO Barrier'): '${tranche.ko}%',
+                    if (tranche.prr != null) l10n.detailLabel('Risk Rating'): 'PRR ${tranche.prr}',
                   }),
-                  _detailSection('Subscription', {
-                    'Subscription Period': tranche.formattedSubscriptionPeriod,
-                    if (tranche.minOrder != null) 'Min Order': '${tranche.currencyName} ${tranche.formattedMinOrder}',
-                    if (tranche.denomination != null) 'Denomination': tranche.denomination!,
-                    if (tranche.eligibleSegments != null) 'Eligible Segments': tranche.eligibleSegments!,
-                    if (tranche.eligibleCities != null) 'Eligible Cities': tranche.eligibleCities!,
-                    if (tranche.issuer != null) 'Issuer': tranche.issuer!,
-                    if (tranche.openToQI != null) 'Open to QI': tranche.openToQI!,
+                  _detailSection(l10n.subscription, {
+                    l10n.detailLabel('Subscription Period'): l10n.formatSubscriptionPeriod(tranche.windowPeriodStartDate, tranche.windowPeriodEndDate),
+                    if (tranche.minOrder != null) l10n.detailLabel('Min Order'): '${l10n.currencyName(tranche.ccy)} ${tranche.formattedMinOrder}',
+                    if (tranche.denomination != null) l10n.detailLabel('Denomination'): tranche.denomination!,
+                    if (tranche.eligibleSegments != null) l10n.detailLabel('Eligible Segments'): tranche.eligibleSegments!,
+                    if (tranche.eligibleCities != null) l10n.detailLabel('Eligible Cities'): tranche.eligibleCities!,
+                    if (tranche.issuer != null) l10n.detailLabel('Issuer'): tranche.issuer!,
+                    if (tranche.openToQI != null) l10n.detailLabel('Open to QI'): tranche.openToQI!,
                   }),
                   if (tranche.underlyingName != null && tranche.underlyingName!.isNotEmpty)
-                    _detailSection('Underlying', {
+                    _detailSection(l10n.underlying, {
                       for (var i = 0; i < tranche.underlyingName!.length; i++)
                         tranche.underlyingName![i]: tranche.underlying != null && i < tranche.underlying!.length
                             ? tranche.underlying![i]
                             : '',
                     }),
                   if (tranche.minReturnPA != null || tranche.maxReturnPA != null)
-                    _detailSection('Returns', {
-                      if (tranche.minReturnPA != null) 'Min Return p.a.': tranche.minReturnPA!,
-                      if (tranche.maxReturnPA != null) 'Max Return p.a.': tranche.maxReturnPA!,
-                      if (tranche.barrierReturnPA != null) 'Barrier Return p.a.': tranche.barrierReturnPA!,
-                      if (tranche.barrierPercent != null) 'Barrier Level': '${tranche.barrierPercent}%',
-                      if (tranche.participationRate != null) 'Participation Rate': '${tranche.participationRate}%',
+                    _detailSection(l10n.returns, {
+                      if (tranche.minReturnPA != null) l10n.detailLabel('Min Return p.a.'): tranche.minReturnPA!,
+                      if (tranche.maxReturnPA != null) l10n.detailLabel('Max Return p.a.'): tranche.maxReturnPA!,
+                      if (tranche.barrierReturnPA != null) l10n.detailLabel('Barrier Return p.a.'): tranche.barrierReturnPA!,
+                      if (tranche.barrierPercent != null) l10n.detailLabel('Barrier Level'): '${tranche.barrierPercent}%',
+                      if (tranche.participationRate != null) l10n.detailLabel('Participation Rate'): '${tranche.participationRate}%',
                     }),
                 ],
               ),

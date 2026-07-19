@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 import '../models/tranche.dart';
 
 class TrancheCard extends StatelessWidget {
@@ -11,6 +12,7 @@ class TrancheCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final l = AppStrings.of(context);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -36,38 +38,35 @@ class TrancheCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                tranche.currencyName,
+                l.currencyName(tranche.ccy),
                 style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontSize: 13),
               ),
               const SizedBox(height: 2),
               Text(
-                tranche.productCnName,
+                l.productTypeName(tranche.productNameCN, tranche.product),
                 style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
               ),
-              if (tranche.badges.isNotEmpty) ...[
+              if (_badges(l).isNotEmpty) ...[
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 6,
                   runSpacing: 4,
-                  children: tranche.badges.map((b) => _buildBadge(b, cs)).toList(),
+                  children: _badges(l).map((b) => _buildBadge(b, cs, l)).toList(),
                 ),
               ],
               const SizedBox(height: 14),
-              _buildInfoRow('银行产品风险评级', _buildRiskRating(cs, theme)),
+              _buildInfoRow(l.riskRating, _buildRiskRating(cs)),
               const SizedBox(height: 8),
-              _buildInfoRow('认购期', Text(tranche.formattedSubscriptionPeriod, style: _valueStyle)),
+              _buildInfoRow(l.subscriptionPeriod, Text(l.formatSubscriptionPeriod(tranche.windowPeriodStartDate, tranche.windowPeriodEndDate), style: _valueStyle)),
               const SizedBox(height: 8),
-              _buildInfoRow('最低投资额', Text('${tranche.currencyName} ${tranche.formattedMinOrder}', style: _valueStyle)),
+              _buildInfoRow(l.minInvestment, Text('${l.currencyName(tranche.ccy)} ${tranche.formattedMinOrder}', style: _valueStyle)),
               const SizedBox(height: 8),
-              _buildInfoRow('投资期限', Text(tranche.formattedTenor, style: _valueStyle)),
+              _buildInfoRow(l.investmentTenor, Text(l.formatTenor(tranche.tenor), style: _valueStyle)),
               const SizedBox(height: 8),
-              _buildInfoRow('本金保障', Text(tranche.formattedProtection, style: _valueStyle)),
+              _buildInfoRow(l.principalProtection, Text(tranche.formattedProtection, style: _valueStyle)),
               if (tranche.underlyingDisplay.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                _buildInfoRow(
-                  '挂钩标的',
-                  Text(tranche.underlyingDisplay, style: _valueStyle),
-                ),
+                _buildInfoRow(l.underlyingAsset, Text(tranche.underlyingDisplay, style: _valueStyle)),
               ],
             ],
           ),
@@ -76,8 +75,15 @@ class TrancheCard extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String label, ColorScheme cs) {
-    final isWarning = label == '非保本';
+  List<String> _badges(AppStrings l) {
+    final result = <String>[];
+    if (!tranche.isPrincipalProtected) result.add(l.nonProtected);
+    if (tranche.isQIOnly) result.add(l.qualifiedInvestor);
+    return result;
+  }
+
+  Widget _buildBadge(String label, ColorScheme cs, AppStrings l) {
+    final isWarning = label == l.nonProtected;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -96,7 +102,7 @@ class TrancheCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRiskRating(ColorScheme cs, ThemeData theme) {
+  Widget _buildRiskRating(ColorScheme cs) {
     final rating = int.tryParse(tranche.prr ?? '') ?? 0;
     final colors = [
       Colors.transparent,

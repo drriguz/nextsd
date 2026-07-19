@@ -113,93 +113,6 @@ class Tranche {
     );
   }
 
-  String get displayName => productNameCN ?? productCnName;
-
-  static const _productCnNames = {
-    'WoB Autocall': '一篮子标的自动触发赎回结构',
-    'Snowball': '雪球自动赎回结构',
-    'Range Accrual': '区间累积结构',
-    'Averaging Autocall': '平均价格自动赎回结构',
-  };
-
-  String get productCnName {
-    if (productNameCN != null && productNameCN!.isNotEmpty) return productNameCN!;
-    return _productCnNames[product] ?? product;
-  }
-
-  String get currencyName {
-    switch (ccy.toUpperCase()) {
-      case 'CNY':
-        return '人民币';
-      case 'USD':
-        return '美元';
-      case 'HKD':
-        return '港元';
-      default:
-        return ccy;
-    }
-  }
-
-  String get formattedMinOrder {
-    if (minOrder == null) return '-';
-    final n = int.tryParse(minOrder!);
-    if (n == null) return minOrder!;
-    return _formatNumber(n);
-  }
-
-  String get formattedTenor {
-    if (tenor.isEmpty) return '-';
-    final m = RegExp(r'(\d+)M').firstMatch(tenor);
-    if (m != null) return '${m.group(1)}个月';
-    final y = RegExp(r'(\d+)Y').firstMatch(tenor);
-    if (y != null) return '${y.group(1)}年';
-    return tenor;
-  }
-
-  String get formattedProtection {
-    if (principalProtection == null) return '-';
-    final v = double.tryParse(principalProtection!);
-    if (v == null) return '$principalProtection%';
-    if (v == v.truncateToDouble()) {
-      return '${v.toInt()}%';
-    }
-    return '${v.toStringAsFixed(1)}%';
-  }
-
-  String get formattedSubscriptionPeriod {
-    if (windowPeriodStartDate == null || windowPeriodEndDate == null) return '-';
-    final start = _formatDate(windowPeriodStartDate!);
-    final end = _formatDate(windowPeriodEndDate!);
-    return '$start - $end';
-  }
-
-  String _formatDate(String raw) {
-    try {
-      final parts = raw.split(' ').first.split('-');
-      if (parts.length != 3) return raw;
-      final monthNames = {
-        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12',
-      };
-      final month = monthNames[parts[1]] ?? parts[1];
-      return '${parts[2]}年$month月${parts[0]}日';
-    } catch (_) {
-      return raw;
-    }
-  }
-
-  static String _formatNumber(int n) {
-    if (n < 1000) return n.toString();
-    final s = n.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
-      buf.write(s[i]);
-    }
-    return buf.toString();
-  }
-
   bool get isOpen {
     final lower = status.toLowerCase();
     if (!lower.contains('open')) return false;
@@ -237,24 +150,45 @@ class Tranche {
     }
   }
 
-  List<String> get segmentTags {
-    if (eligibleSegments == null || eligibleSegments!.isEmpty) return [];
-    return eligibleSegments!.split(',').map((s) => s.trim()).toList();
-  }
-
-  bool get isQIOnly => openToQI == 'Yes';
-
   bool get isPrincipalProtected {
     if (principalProtection == null) return false;
     final v = double.tryParse(principalProtection!);
     return v != null && v >= 100;
   }
 
-  List<String> get badges {
-    final result = <String>[];
-    if (!isPrincipalProtected) result.add('非保本');
-    if (isQIOnly) result.add('合格投资者');
-    return result;
+  bool get isQIOnly => openToQI == 'Yes';
+
+  List<String> get segmentTags {
+    if (eligibleSegments == null || eligibleSegments!.isEmpty) return [];
+    return eligibleSegments!.split(',').map((s) => s.trim()).toList();
+  }
+
+  String get formattedMinOrder {
+    if (minOrder == null) return '-';
+    final n = int.tryParse(minOrder!);
+    if (n == null) return minOrder!;
+    return _formatNumber(n);
+  }
+
+  static String _formatNumber(int n) {
+    if (n < 1000) return n.toString();
+    final s = n.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+      buf.write(s[i]);
+    }
+    return buf.toString();
+  }
+
+  String get formattedProtection {
+    if (principalProtection == null) return '-';
+    final v = double.tryParse(principalProtection!);
+    if (v == null) return '$principalProtection%';
+    if (v == v.truncateToDouble()) {
+      return '${v.toInt()}%';
+    }
+    return '${v.toStringAsFixed(1)}%';
   }
 
   String get underlyingDisplay {
