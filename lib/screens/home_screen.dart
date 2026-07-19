@@ -4,7 +4,8 @@ import '../models/daily_transaction.dart';
 import '../models/tranche.dart';
 import '../services/locale_provider.dart';
 import '../services/product_service.dart';
-import '../widgets/global_search_delegate.dart';
+import '../services/smart_search_service.dart';
+import '../widgets/smart_search_delegate.dart';
 import '../widgets/tranche_card.dart';
 import 'chat_screen.dart';
 import 'change_password_screen.dart';
@@ -49,6 +50,15 @@ class _HomeScreenState extends State<HomeScreen> {
     widget.localeProvider.addListener(_onLocaleChange);
     MockTransactionGenerator.instance.generate();
     _loadProducts();
+    _initSmartSearch();
+  }
+
+  Future<void> _initSmartSearch() async {
+    try {
+      await SmartSearchService.instance.initModel();
+    } catch (e) {
+      debugPrint('Smart search init failed: $e');
+    }
   }
 
   void _onLocaleChange() {
@@ -58,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     widget.localeProvider.removeListener(_onLocaleChange);
+    SmartSearchService.instance.dispose();
     super.dispose();
   }
 
@@ -111,9 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               showSearch(
                 context: context,
-                delegate: GlobalSearchDelegate(
-                  tranches: _allTranches ?? [],
+                delegate: SmartSearchDelegate(
                   l10n: l10n,
+                  locale: widget.localeProvider.locale,
+                  tranches: _allTranches ?? [],
+                  onNavigateToTab: (tab) => setState(() => _currentTab = tab),
                 ),
               );
             },

@@ -5,8 +5,15 @@ enum TransferType { own, others, international }
 
 class TransferScreen extends StatefulWidget {
   final TransferType transferType;
+  final String? initialAmount;
+  final String? initialRecipient;
 
-  const TransferScreen({super.key, required this.transferType});
+  const TransferScreen({
+    super.key,
+    required this.transferType,
+    this.initialAmount,
+    this.initialRecipient,
+  });
 
   @override
   State<TransferScreen> createState() => _TransferScreenState();
@@ -20,6 +27,17 @@ class _TransferScreenState extends State<TransferScreen> {
   final _amountController = TextEditingController();
   final _remarksController = TextEditingController();
   String _selectedCurrency = 'CNY';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialRecipient != null) {
+      _nameController.text = widget.initialRecipient!;
+    }
+    if (widget.initialAmount != null) {
+      _amountController.text = widget.initialAmount!;
+    }
+  }
 
   @override
   void dispose() {
