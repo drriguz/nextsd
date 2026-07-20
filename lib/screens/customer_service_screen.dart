@@ -11,12 +11,14 @@ class CSTriageResult {
   final String intent;
   final String emotion;
   final String summary;
+  final String cleanSummary;
   final String reply;
 
   CSTriageResult({
     required this.intent,
     required this.emotion,
     required this.summary,
+    required this.cleanSummary,
     required this.reply,
   });
 
@@ -25,6 +27,7 @@ class CSTriageResult {
       intent: json['intent']?.toString() ?? 'unknown',
       emotion: json['emotion']?.toString() ?? 'neutral',
       summary: json['summary']?.toString() ?? '',
+      cleanSummary: json['clean_summary']?.toString() ?? '',
       reply: json['reply']?.toString() ?? '',
     );
   }
@@ -99,7 +102,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
     final instruction = isZh
         ? '''
 请分析以下用户消息，输出 JSON（仅 JSON，不要其他文字）：
-{"intent": "投诉|咨询|建议|其他", "emotion": "积极|中性|沮丧|愤怒|紧急", "summary": "一句话摘要（中文）", "reply": "你的回复开头"}
+{"intent": "投诉|咨询|建议|其他", "emotion": "积极|中性|沮丧|愤怒|紧急", "summary": "一句话摘要（中文）", "clean_summary": "脱敏摘要（去除姓名、金额、账号等隐私信息）", "reply": "你的回复开头"}
 
 回复要求：先共情，再提供帮助。投诉要致歉，建议要感谢。
 
@@ -107,7 +110,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
 ${contextLines.join('\n')}'''
         : '''
 Analyze this user message and output JSON (only JSON):
-{"intent": "complaint|inquiry|suggestion|other", "emotion": "positive|neutral|frustrated|angry|urgent", "summary": "one-line summary", "reply": "your response opening"}
+{"intent": "complaint|inquiry|suggestion|other", "emotion": "positive|neutral|frustrated|angry|urgent", "summary": "one-line summary", "clean_summary": "anonymized summary (remove names, amounts, account numbers)", "reply": "your response opening"}
 
 Be empathetic. Apologize for complaints, thank for suggestions.
 
@@ -120,6 +123,8 @@ ${contextLines.join('\n')}''';
   Future<void> _runTriage(String userMessage) async {
     try {
       final prompt = _buildTriagePrompt();
+      // Send triage as a combined message to the existing chat session
+      // instead of creating a new one (avoids 10s+ prefill penalty).
       final result = await _modelService.runStructuredQuery(prompt, userMessage);
 
       if (result != null) {
@@ -359,24 +364,50 @@ ${contextLines.join('\n')}''';
               ],
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
               children: [
-                _tag(
-                    isZh ? '意图' : 'Intent',
-                    t.intent,
-                    intentColor,
-                    cs),
-                const SizedBox(width: 8),
-                _tag(
-                    isZh ? '情绪' : 'Emotion',
-                    t.emotion,
-                    emotionColor,
-                    cs),
+                _tag(isZh ? '意图' : 'Intent', t.intent, intentColor, cs),
+                _tag(isZh ? '情绪' : 'Emotion', t.emotion, emotionColor, cs),
               ],
             ),
             const SizedBox(height: 10),
             Text(t.summary,
                 style: TextStyle(fontSize: 13, color: cs.onSurface)),
+            if (t.cleanSummary.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.verified_user, size: 14, color: Colors.green[600]),
+                        const SizedBox(width: 6),
+                        Text(
+                          isZh ? '已脱敏 · 可发送至后台' : 'Anonymized · Ready to Send',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green[600]),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(t.cleanSummary,
+                        style: TextStyle(fontSize: 13, color: cs.onSurface)),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -385,20 +416,15 @@ ${contextLines.join('\n')}''';
 
   Widget _tag(String label, String value, Color color, ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('$label: ',
-              style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant)),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w600, color: color)),
-        ],
+      child: Text(
+        '$label $value',
+        style:
+            TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color),
       ),
     );
   }
